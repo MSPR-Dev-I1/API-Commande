@@ -6,7 +6,7 @@ from app import actions, schemas, models
 
 router = APIRouter()
 
-@router.get("", response_model=List[schemas.Commande])
+@router.get("", response_model=List[schemas.Commande], tags=["commande"])
 async def get_commandes(database: Session = Depends(get_db)):
     """
         Retourne toutes les commandes
@@ -18,7 +18,7 @@ async def get_commandes(database: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
-@router.get("/{id_commande}", response_model=schemas.Commande)
+@router.get("/{id_commande}", response_model=schemas.Commande, tags=["commande"])
 async def get_commande(id_commande: int, database: Session = Depends(get_db)):
     """
         Retourne la commande trouvé par son id
@@ -35,7 +35,7 @@ async def get_commande(id_commande: int, database: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
-@router.post("", response_model=schemas.Commande, status_code=201)
+@router.post("", response_model=schemas.Commande, status_code=201, tags=["commande"])
 async def post_commande(commande: schemas.CommandeCreate, database: Session = Depends(get_db)):
     """
         Créer une nouvelle commande
@@ -55,7 +55,7 @@ async def post_commande(commande: schemas.CommandeCreate, database: Session = De
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
-@router.delete("/{id_commande}")
+@router.delete("/{id_commande}", tags=["commande"])
 async def delete_commande(id_commande: int, database: Session = Depends(get_db)):
     """
         Supprime une commande
@@ -73,7 +73,7 @@ async def delete_commande(id_commande: int, database: Session = Depends(get_db))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
-@router.patch("/{id_commande}", response_model=schemas.Commande)
+@router.patch("/{id_commande}", response_model=schemas.Commande, tags=["commande"])
 async def patch_commande(id_commande: int,
     commande: schemas.CommandeUpdate, database: Session = Depends(get_db)):
     """

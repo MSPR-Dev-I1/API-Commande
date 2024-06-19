@@ -4,7 +4,7 @@ from app.connexion import create_tables
 
 router = APIRouter()
 
-@router.post("")
+@router.post("", tags=["database"])
 async def create_database():
     """
         Create database
