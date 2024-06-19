@@ -1,17 +1,8 @@
-from fastapi import FastAPI, HTTPException
-from app.database import create_tables
+from fastapi import FastAPI
+from app.routers import database
 
 app = FastAPI()
 
 origins = ["*"]
 
-@app.post("/create-database")
-async def create_database():
-    """
-        Create database
-    """
-    try:
-        create_tables()
-        return "database created"
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+app.include_router(database.router, prefix="/database")

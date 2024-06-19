@@ -1,3 +1,4 @@
 [run]
 omit =
-    **/database/connexion.py
+    **/connexion.py
+    **/main.py

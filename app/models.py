@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
@@ -5,7 +6,6 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy import String, Integer, DateTime, DECIMAL, Boolean
 from sqlalchemy import ForeignKey
-from datetime import datetime
 
 # pylint: disable=too-few-public-methods
 class Base(DeclarativeBase):
