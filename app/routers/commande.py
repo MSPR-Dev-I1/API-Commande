@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.connexion import get_db
 from app import actions, schemas, models
 
+
 router = APIRouter()
 
 @router.get("", response_model=List[schemas.Commande], tags=["commande"])
@@ -30,8 +31,8 @@ async def get_commande(id_commande: int, database: Session = Depends(get_db)):
             raise HTTPException(status_code=404, detail="Commande not found")
 
         return db_commande
-    except HTTPException as http_exc:
-        raise http_exc
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
@@ -68,8 +69,8 @@ async def delete_commande(id_commande: int, database: Session = Depends(get_db))
         actions.delete_commande(db_commande, database)
 
         return {"deleted": id_commande}
-    except HTTPException as http_exc:
-        raise http_exc
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
@@ -87,7 +88,7 @@ async def patch_commande(id_commande: int,
         db_commande = actions.update_commande(db_commande, commande, database)
 
         return db_commande
-    except HTTPException as http_exc:
-        raise http_exc
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e

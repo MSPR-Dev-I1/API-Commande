@@ -1,24 +1,10 @@
 from datetime import datetime
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from app.test.utils import memory_engine
 from app import models, actions
-from app.models import Base
 from app.main import app
 
 client = TestClient(app)
-
-def memory_engine():
-    """
-        Créer un engine sqlalchemy qui utilise la mémoire
-    """
-    engine = create_engine('sqlite:///:memory:')
-    Base.metadata.create_all(engine)
-
-    session_factory = sessionmaker(bind=engine)
-    database = scoped_session(session_factory)
-
-    return database
 
 def test_get_commandes(mocker):
     """

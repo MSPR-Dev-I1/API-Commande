@@ -34,3 +34,31 @@ class CommandeUpdate(BaseModel):
     status_livraison: Union[str, None] = None
     adresse_livraison: Union[str, None] = None
     id_client: Union[int, None] = None
+
+class ProduitCommandeBase(BaseModel):
+    """
+        Classe interface base Produit Commande
+    """
+    id_produit: int
+    quantitee: int
+    commande_id: int
+
+class ProduitCommande(ProduitCommandeBase):
+    """
+        Classe interface Produit Commande
+    """
+    id_produit_commande: int
+
+
+class ProduitCommandeCreate(ProduitCommandeBase):
+    """
+         Classe interface Produit Commande Create
+    """
+
+class ProduitCommandeUpdate(BaseModel):
+    """
+        Classe interface Produit Commande Update
+    """
+    id_produit: Union[int, None] = None
+    quantitee: Union[int, None] = None
+    commande_id: Union[int, None] = None
