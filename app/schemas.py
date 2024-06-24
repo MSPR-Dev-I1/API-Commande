@@ -10,7 +10,7 @@ class CommandeBase(BaseModel):
     montant_total: float
     payee: bool
     status_livraison: str
-    adresse_livraison: str
+    adresse_livraison: Union[str, None] = None
     id_client: int
 
 class Commande(CommandeBase):
@@ -62,3 +62,21 @@ class ProduitCommandeUpdate(BaseModel):
     id_produit: Union[int, None] = None
     quantitee: Union[int, None] = None
     commande_id: Union[int, None] = None
+
+class StatutLivraisonCommande(BaseModel):
+    """
+        Classe interface Commande status livraison
+    """
+    status_livraison: str
+
+class MontantCommande(BaseModel):
+    """
+        Classe interface Commande montant
+    """
+    montant_total: float
+
+class AdresseLivraisonCommande(BaseModel):
+    """
+        Classe interface Commande adresse livraison
+    """
+    adresse_livraison: str

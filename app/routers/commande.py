@@ -19,6 +19,18 @@ async def get_commandes(database: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
+@router.get('/commande-non-livrees', response_model=List[schemas.Commande], tags=['commande'])
+async def commandes_non_livrees(database: Session = Depends(get_db)):
+    """
+        Retourne la liste de commandes non livrées
+    """
+    try:
+        commandes = actions.commandes_non_livrees(database)
+        print(commandes)
+        return commandes
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
 @router.get("/{id_commande}", response_model=schemas.Commande, tags=["commande"])
 async def get_commande(id_commande: int, database: Session = Depends(get_db)):
     """
@@ -86,6 +98,140 @@ async def patch_commande(id_commande: int,
             raise HTTPException(status_code=404, detail="Commande not found")
 
         db_commande = actions.update_commande(db_commande, commande, database)
+
+        return db_commande
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
+@router.get('/client/{id_client}', response_model=List[schemas.Commande], tags=['commande'])
+async def get_commandes_client(id_client: int, database: Session = Depends(get_db)):
+    """
+        Retourne les commandes du client
+    """
+    try:
+        commandes = actions.get_commandes_client(id_client, database)
+
+        return commandes
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
+@router.post('/{id_commande}/annulation-client', response_model=schemas.Commande, tags=['commande'])
+async def annulation_client(id_commande: int, database: Session = Depends(get_db)):
+    """
+        Annulation la commande (par un client)
+    """
+    try:
+        db_commande = actions.get_commande(id_commande, database)
+        if db_commande is None:
+            raise HTTPException(status_code=404, detail="Commande not found")
+
+        if db_commande.status_livraison == "annulée":
+            raise HTTPException(status_code=400, detail="Commande déjà annulée")
+
+        if db_commande.status_livraison == "livrée":
+            raise HTTPException(status_code=400, detail="La commande est déjà livrée")
+
+        new_commande = schemas.CommandeUpdate(
+            status_livraison="annulée",
+        )
+        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+
+        return db_commande
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
+@router.post('/{id_commande}/annulation-preparateur',
+    response_model=schemas.Commande, tags=['commande'])
+async def annulation_preparateur(id_commande: int, database: Session = Depends(get_db)):
+    """
+        Annulation la commande (par un préparateur)
+    """
+    try:
+        db_commande = actions.get_commande(id_commande, database)
+        if db_commande is None:
+            raise HTTPException(status_code=404, detail="Commande not found")
+
+        if db_commande.status_livraison == "annulée":
+            raise HTTPException(status_code=400, detail="Commande déjà annulée")
+
+        if db_commande.status_livraison == "livrée":
+            raise HTTPException(status_code=400, detail="La commande est déjà livrée")
+
+        new_commande = schemas.CommandeUpdate(
+            status_livraison="annulée",
+        )
+        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+
+        return db_commande
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
+@router.patch('/{id_commande}/changer-statut-commande',
+    response_model=schemas.Commande, tags=['commande'])
+async def changer_statut_commande(id_commande: int,
+    status_livraison: schemas.StatutLivraisonCommande, database: Session = Depends(get_db)):
+    """
+        Change le status de la commande
+    """
+    try:
+        db_commande = actions.get_commande(id_commande, database)
+        if db_commande is None:
+            raise HTTPException(status_code=404, detail="Commande not found")
+
+        new_commande = schemas.CommandeUpdate(
+            status_livraison=status_livraison.status_livraison,
+        )
+        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+
+        return db_commande
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
+@router.get('/{id_commande}/montant-commande',
+    response_model=schemas.MontantCommande, tags=['commande'])
+async def montant_commande(id_commande: int, database: Session = Depends(get_db)):
+    """
+        Retourne le montant d'une commande
+    """
+    try:
+        db_commande = actions.get_commande(id_commande, database)
+        if db_commande is None:
+            raise HTTPException(status_code=404, detail="Commande not found")
+
+        db_montant_commande = schemas.MontantCommande(
+            montant_total=db_commande.montant_total
+        )
+
+        return db_montant_commande
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
+
+@router.post('/{id_commande}/adresse-livraison', response_model=schemas.Commande, tags=['commande'])
+async def adresse_livraison(id_commande: int,
+    adresse: schemas.AdresseLivraisonCommande, database: Session = Depends(get_db)):
+    """
+        Ajoute la l'adresse de livraison à la commande
+    """
+    try:
+        db_commande = actions.get_commande(id_commande, database)
+        if db_commande is None:
+            raise HTTPException(status_code=404, detail="Commande not found")
+
+        new_commande = schemas.CommandeUpdate(
+            adresse_livraison=adresse.adresse_livraison
+        )
+
+        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
 
         return db_commande
     except HTTPException as e:
