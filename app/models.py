@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -25,7 +25,7 @@ class Commande(Base):
     montant_total: Mapped[float] = mapped_column(DECIMAL(5, 2))
     payee: Mapped[bool] = mapped_column(Boolean)
     status_livraison: Mapped[str] = mapped_column(String(50))
-    adresse_livraison: Mapped[str] = mapped_column(String(255))
+    adresse_livraison: Mapped[Optional[str]] = mapped_column(String(255))
     id_client: Mapped[int] = mapped_column(Integer)
 
     produits_commande: Mapped[List["ProduitCommande"]] \

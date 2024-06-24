@@ -88,3 +88,20 @@ def update_produit_commande(db_produit_commande: models.ProduitCommande,
     database.commit()
 
     return db_produit_commande
+
+def get_commandes_client(id_client: int, database: Session):
+    """
+        Récupére toutes les commandes du client
+    """
+    commandes = database.query(models.Commande) \
+        .where(models.Commande.id_client==id_client).all()
+    return commandes
+
+def commandes_non_livrees(database: Session):
+    """
+        Récupere toutes les commandes non livrées
+    """
+    commandes = database.query(models.Commande) \
+        .where(models.Commande.status_livraison!="livrée").all()
+
+    return commandes
