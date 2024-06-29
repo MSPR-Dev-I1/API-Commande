@@ -3,12 +3,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.connexion import get_db
 from app import actions, schemas, models
-
+from app.routers.auth import verify_authorization
 
 router = APIRouter()
 
 @router.get("", response_model=List[schemas.Commande], tags=["commande"])
-async def get_commandes(database: Session = Depends(get_db)):
+async def get_commandes(database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne toutes les commandes
     """
@@ -20,7 +21,8 @@ async def get_commandes(database: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
 @router.get('/commande-non-livrees', response_model=List[schemas.Commande], tags=['commande'])
-async def commandes_non_livrees(database: Session = Depends(get_db)):
+async def commandes_non_livrees(database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne la liste de commandes non livrées
     """
@@ -32,7 +34,8 @@ async def commandes_non_livrees(database: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
 @router.get("/{id_commande}", response_model=schemas.Commande, tags=["commande"])
-async def get_commande(id_commande: int, database: Session = Depends(get_db)):
+async def get_commande(id_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne la commande trouvé par son id
     """
@@ -49,7 +52,8 @@ async def get_commande(id_commande: int, database: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
 @router.post("", response_model=schemas.Commande, status_code=201, tags=["commande"])
-async def post_commande(commande: schemas.CommandeCreate, database: Session = Depends(get_db)):
+async def post_commande(commande: schemas.CommandeCreate, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Créer une nouvelle commande
     """
@@ -69,7 +73,8 @@ async def post_commande(commande: schemas.CommandeCreate, database: Session = De
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
 @router.delete("/{id_commande}", tags=["commande"])
-async def delete_commande(id_commande: int, database: Session = Depends(get_db)):
+async def delete_commande(id_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Supprime une commande
     """
@@ -88,7 +93,8 @@ async def delete_commande(id_commande: int, database: Session = Depends(get_db))
 
 @router.patch("/{id_commande}", response_model=schemas.Commande, tags=["commande"])
 async def patch_commande(id_commande: int,
-    commande: schemas.CommandeUpdate, database: Session = Depends(get_db)):
+    commande: schemas.CommandeUpdate, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Met à jour les données de la commande
     """
@@ -106,7 +112,8 @@ async def patch_commande(id_commande: int,
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
 @router.get('/client/{id_client}', response_model=List[schemas.Commande], tags=['commande'])
-async def get_commandes_client(id_client: int, database: Session = Depends(get_db)):
+async def get_commandes_client(id_client: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne les commandes du client
     """
@@ -118,7 +125,8 @@ async def get_commandes_client(id_client: int, database: Session = Depends(get_d
         raise HTTPException(status_code=500, detail=f"Connection failed: {e}") from e
 
 @router.post('/{id_commande}/annulation-client', response_model=schemas.Commande, tags=['commande'])
-async def annulation_client(id_commande: int, database: Session = Depends(get_db)):
+async def annulation_client(id_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Annulation la commande (par un client)
     """
@@ -146,7 +154,8 @@ async def annulation_client(id_commande: int, database: Session = Depends(get_db
 
 @router.post('/{id_commande}/annulation-preparateur',
     response_model=schemas.Commande, tags=['commande'])
-async def annulation_preparateur(id_commande: int, database: Session = Depends(get_db)):
+async def annulation_preparateur(id_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Annulation la commande (par un préparateur)
     """
@@ -175,7 +184,8 @@ async def annulation_preparateur(id_commande: int, database: Session = Depends(g
 @router.patch('/{id_commande}/changer-statut-commande',
     response_model=schemas.Commande, tags=['commande'])
 async def changer_statut_commande(id_commande: int,
-    status_livraison: schemas.StatutLivraisonCommande, database: Session = Depends(get_db)):
+    status_livraison: schemas.StatutLivraisonCommande, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Change le status de la commande
     """
@@ -197,7 +207,8 @@ async def changer_statut_commande(id_commande: int,
 
 @router.get('/{id_commande}/montant-commande',
     response_model=schemas.MontantCommande, tags=['commande'])
-async def montant_commande(id_commande: int, database: Session = Depends(get_db)):
+async def montant_commande(id_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne le montant d'une commande
     """
@@ -218,7 +229,8 @@ async def montant_commande(id_commande: int, database: Session = Depends(get_db)
 
 @router.post('/{id_commande}/adresse-livraison', response_model=schemas.Commande, tags=['commande'])
 async def adresse_livraison(id_commande: int,
-    adresse: schemas.AdresseLivraisonCommande, database: Session = Depends(get_db)):
+    adresse: schemas.AdresseLivraisonCommande, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Ajoute la l'adresse de livraison à la commande
     """
