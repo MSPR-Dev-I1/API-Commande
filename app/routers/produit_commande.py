@@ -3,11 +3,13 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.connexion import get_db
 from app import actions, schemas, models
+from app.routers.auth import verify_authorization
 
 router = APIRouter()
 
 @router.get("", response_model=List[schemas.ProduitCommande], tags=["produit_commande"])
-async def get_produits_commande(database: Session = Depends(get_db)):
+async def get_produits_commande(database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne toutes les produits des commandes
     """
@@ -20,7 +22,8 @@ async def get_produits_commande(database: Session = Depends(get_db)):
 
 @router.get("/{id_produit_commande}", response_model=schemas.ProduitCommande,
     tags=["produit_commande"])
-async def get_produit_commande(id_produit_commande: int, database: Session = Depends(get_db)):
+async def get_produit_commande(id_produit_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Retourne le produit d'une commande trouvé par son id
     """
@@ -38,7 +41,8 @@ async def get_produit_commande(id_produit_commande: int, database: Session = Dep
 
 @router.post("", response_model=schemas.ProduitCommande, status_code=201, tags=["produit_commande"])
 async def post_produit_commande(produit_commande: schemas.ProduitCommandeCreate,
-    database: Session = Depends(get_db)):
+    database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Ajoute un produit à une commande
     """
@@ -55,7 +59,8 @@ async def post_produit_commande(produit_commande: schemas.ProduitCommandeCreate,
         raise HTTPException(status_code=500, detail=f"Connection failed: {exc}") from exc
 
 @router.delete("/{id_produit_commande}", tags=["produit_commande"])
-async def delete_produit_commande(id_produit_commande: int, database: Session = Depends(get_db)):
+async def delete_produit_commande(id_produit_commande: int, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Supprime un produit d'une commande
     """
@@ -75,7 +80,8 @@ async def delete_produit_commande(id_produit_commande: int, database: Session = 
 @router.patch("/{id_produit_commande}", response_model=schemas.ProduitCommande,
     tags=["produit_commande"])
 async def patch_produit_commande(id_produit_commande: int,
-    produit_commande: schemas.ProduitCommandeUpdate, database: Session = Depends(get_db)):
+    produit_commande: schemas.ProduitCommandeUpdate, database: Session = Depends(get_db),
+                    _ = Depends(verify_authorization)):
     """
         Met à jour les données d'un produit d'une commande
     """

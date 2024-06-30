@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.test.utils import memory_engine
 from app import models, actions
 from app.main import app
+from app.test.setup import setup_mock_auth
 
 client = TestClient(app)
 
@@ -21,7 +22,11 @@ def test_get_commandes(mocker):
     }]
     mocker.patch("sqlalchemy.orm.Session.query", return_value=commandes)
 
-    response = client.get("/commande")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande",
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json() == commandes
@@ -32,7 +37,11 @@ def test_get_commandes_error_500(mocker):
     """
     mocker.patch("sqlalchemy.orm.Session.query", side_effect=Exception("Connection error"))
 
-    response = client.get("/commande")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -53,7 +62,11 @@ def test_get_commande(mocker):
     mock_query.where.return_value.first.return_value = db_commande
     mocker.patch("sqlalchemy.orm.Session.query", return_value=mock_query)
 
-    response = client.get("/commande/" + str(db_commande['id_commande']))
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/" + str(db_commande['id_commande']),
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json() == db_commande
@@ -67,7 +80,11 @@ def test_get_commande_error_404(mocker):
     mock_query.where.return_value.first.return_value = db_commande
     mocker.patch("sqlalchemy.orm.Session.query", return_value=mock_query)
 
-    response = client.get("/commande/1")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/1",
+                           headers=headers)
 
     assert response.status_code == 404
     assert response.json() == {'detail': 'Commande not found'}
@@ -78,7 +95,11 @@ def test_get_commande_error_500(mocker):
     """
     mocker.patch("sqlalchemy.orm.Session.query", side_effect=Exception("Connection error"))
 
-    response = client.get("/commande/1")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/1",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -106,7 +127,11 @@ def test_post_commande(mocker):
 
     mocker.patch("app.actions.create_commande", return_value=db_commande)
 
-    response = client.post("/commande", json=new_commande)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("/commande", json=new_commande,
+                           headers=headers)
 
     assert response.status_code == 201
 
@@ -129,7 +154,7 @@ def test_action_create_commande():
     assert isinstance(db_commande, models.Commande)
     assert db_commande.id_commande is not None
 
-def test_post_commande_error_422():
+def test_post_commande_error_422(mocker):
     """
         Cas non passant (des informations de la commande sont manquants)
     """
@@ -140,7 +165,11 @@ def test_post_commande_error_422():
         "id_client": 1
     }
 
-    response = client.post("/commande", json=new_commande)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("/commande", json=new_commande,
+                           headers=headers)
 
     assert response.status_code == 422
 
@@ -158,7 +187,11 @@ def test_post_commande_error_500(mocker):
     }
     mocker.patch("sqlalchemy.orm.Session.commit", side_effect=Exception("Connection error"))
 
-    response = client.post("/commande", json=new_commande)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("/commande", json=new_commande,
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -179,7 +212,11 @@ def test_delete_commande(mocker):
     mocker.patch("sqlalchemy.orm.Session.delete", return_value=None)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
-    response = client.delete("/commande/" + str(db_commande.id_commande))
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.delete("/commande/" + str(db_commande.id_commande),
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json() == {"deleted": db_commande.id_commande}
@@ -190,7 +227,11 @@ def test_delete_commande_error_404(mocker):
     """
     mocker.patch("app.actions.get_commande", return_value=None)
 
-    response = client.delete("/commande/1")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.delete("/commande/1",
+                           headers=headers)
 
     assert response.status_code == 404
 
@@ -210,7 +251,11 @@ def test_delete_commande_error_500(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.delete", side_effect=Exception("Connection error"))
 
-    response = client.delete("/commande/1")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.delete("/commande/1",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -233,7 +278,11 @@ def test_patch_commande(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
-    response = client.patch("/commande/" + str(db_commande.id_commande), json=commande_updated)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.patch("/commande/" + str(db_commande.id_commande), json=commande_updated,
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json()["status_livraison"] == commande_updated["status_livraison"]
@@ -247,7 +296,11 @@ def test_patch_commande_error_404(mocker):
     }
     mocker.patch("app.actions.get_commande", return_value=None)
 
-    response = client.patch("/commande/1", json=commande_updated)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.patch("/commande/1", json=commande_updated,
+                           headers=headers)
 
     assert response.status_code == 404
 
@@ -270,7 +323,11 @@ def test_patch_commande_error_500(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", side_effect=Exception("Connection error"))
 
-    response = client.patch("/commande/" + str(db_commande.id_commande), json=commande_updated)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.patch("/commande/" + str(db_commande.id_commande), json=commande_updated,
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -300,7 +357,11 @@ def test_get_commandes_client(mocker):
     mock_query.where.return_value.all.return_value = commandes
     mocker.patch("sqlalchemy.orm.Session.query", return_value=mock_query)
 
-    response = client.get("/commande/client/1")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/client/1",
+                           headers=headers)
 
     assert response.status_code == 200
     for commande in commandes:
@@ -312,7 +373,11 @@ def test_get_commandes_client_error_500(mocker):
     """
     mocker.patch("sqlalchemy.orm.Session.query", side_effect=Exception("Connection error"))
 
-    response = client.get("/commande/client/1")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/client/1",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -342,7 +407,11 @@ def test_get_commandes_non_livrees(mocker):
     mock_query.where.return_value.all.return_value = commandes
     mocker.patch("sqlalchemy.orm.Session.query", return_value=mock_query)
 
-    response = client.get("/commande/commande-non-livrees")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/commande-non-livrees",
+                           headers=headers)
 
     assert response.status_code == 200
     for commande in commandes:
@@ -354,7 +423,11 @@ def test_get_commandes_non_livrees_500(mocker):
     """
     mocker.patch("sqlalchemy.orm.Session.query", side_effect=Exception("Connection error"))
 
-    response = client.get("/commande/commande-non-livrees")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("/commande/commande-non-livrees",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -374,7 +447,11 @@ def test_post_annulation_client(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client",
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json()["status_livraison"] == 'annulée'
@@ -385,7 +462,11 @@ def test_post_annulation_client_error_404(mocker):
     """
     mocker.patch("app.actions.get_commande", return_value=None)
 
-    response = client.post("commande/1/annulation-client")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/1/annulation-client",
+                           headers=headers)
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Commande not found"}
@@ -405,7 +486,11 @@ def test_post_annulation_client_error_400_deja_annulee(mocker):
     )
     mocker.patch("app.actions.get_commande", return_value=db_commande)
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client",
+                           headers=headers)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Commande déjà annulée"}
@@ -426,7 +511,11 @@ def test_post_annulation_client_error_400_deja_livree(mocker):
     )
     mocker.patch("app.actions.get_commande", return_value=db_commande)
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client",
+                           headers=headers)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "La commande est déjà livrée"}
@@ -447,7 +536,11 @@ def test_post_annulation_client_error_500(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", side_effect=Exception("Connection error"))
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-client",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -467,7 +560,11 @@ def test_post_annulation_preparateur(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur",
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json()["status_livraison"] == 'annulée'
@@ -478,7 +575,11 @@ def test_post_annulation_preparateur_error_404(mocker):
     """
     mocker.patch("app.actions.get_commande", return_value=None)
 
-    response = client.post("commande/1/annulation-preparateur")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/1/annulation-preparateur",
+                           headers=headers)
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Commande not found"}
@@ -498,7 +599,11 @@ def test_post_annulation_preparateur_error_400_deja_annulee(mocker):
     )
     mocker.patch("app.actions.get_commande", return_value=db_commande)
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur",
+                           headers=headers)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Commande déjà annulée"}
@@ -519,7 +624,11 @@ def test_post_annulation_preparateur_error_400_deja_livree(mocker):
     )
     mocker.patch("app.actions.get_commande", return_value=db_commande)
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur",
+                           headers=headers)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "La commande est déjà livrée"}
@@ -540,7 +649,11 @@ def test_post_annulation_preparateur_error_500(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", side_effect=Exception("Connection error"))
 
-    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/" + str(db_commande.id_commande) + "/annulation-preparateur",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -563,8 +676,12 @@ def test_patch_changer_status_commande(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
     response = client.patch("commande/"
-        + str(db_commande.id_commande) + "/changer-statut-commande", json=statut_livraison)
+        + str(db_commande.id_commande) + "/changer-statut-commande", json=statut_livraison,
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json()['status_livraison'] == "expédiée"
@@ -578,7 +695,11 @@ def test_patch_changer_status_commande_error_400(mocker):
         "status_livraison": "expédiée"
     }
 
-    response = client.patch("commande/1/changer-statut-commande", json=statut_livraison)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.patch("commande/1/changer-statut-commande", json=statut_livraison,
+                           headers=headers)
 
     assert response.status_code == 404
 
@@ -601,8 +722,12 @@ def test_patch_changer_status_commande_error_500(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", side_effect=Exception("Connection error"))
 
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
     response = client.patch("commande/"
-        + str(db_commande.id_commande) + "/changer-statut-commande", json=statut_livraison)
+        + str(db_commande.id_commande) + "/changer-statut-commande", json=statut_livraison,
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -621,7 +746,11 @@ def test_get_montant_commande(mocker):
     )
     mocker.patch("app.actions.get_commande", return_value=db_commande)
 
-    response = client.get("commande/" + str(db_commande.id_commande) + "/montant-commande")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("commande/" + str(db_commande.id_commande) + "/montant-commande",
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json() == {"montant_total": db_commande.montant_total}
@@ -632,7 +761,11 @@ def test_get_montant_commande_error_404(mocker):
     """
     mocker.patch("app.actions.get_commande", return_value=None)
 
-    response = client.get("commande/1/montant-commande")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("commande/1/montant-commande",
+                           headers=headers)
 
     assert response.status_code == 404
 
@@ -642,7 +775,11 @@ def test_get_montant_commande_error_500(mocker):
     """
     mocker.patch("app.actions.get_commande", side_effect=Exception("Connection error"))
 
-    response = client.get("commande/1/montant-commande")
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.get("commande/1/montant-commande",
+                           headers=headers)
 
     assert response.status_code == 500
 
@@ -665,7 +802,11 @@ def test_post_adresse_livraison(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
-    response = client.post("commande/1/adresse-livraison", json=new_commande)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/1/adresse-livraison", json=new_commande,
+                           headers=headers)
 
     assert response.status_code == 200
     assert response.json()['adresse_livraison'] == new_commande['adresse_livraison']
@@ -679,7 +820,11 @@ def test_post_adresse_livraison_error_404(mocker):
     }
     mocker.patch("app.actions.get_commande", return_value=None)
 
-    response = client.post("commande/1/adresse-livraison", json=new_commande)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/1/adresse-livraison", json=new_commande,
+                           headers=headers)
 
     assert response.status_code == 404
 
@@ -702,6 +847,10 @@ def test_post_adresse_livraison_error_500(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", side_effect=Exception("Connection error"))
 
-    response = client.post("commande/1/adresse-livraison", json=new_commande)
+    setup_mock_auth(mocker)
+
+    headers = {"token": "None"}
+    response = client.post("commande/1/adresse-livraison", json=new_commande,
+                           headers=headers)
 
     assert response.status_code == 500
