@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.connexion import get_db
-from app import actions, schemas, models
+from app import actions, schemas, models, message
 from app.routers.auth import verify_authorization
 
 router = APIRouter()
@@ -144,7 +144,10 @@ async def annulation_client(id_commande: int, database: Session = Depends(get_db
         new_commande = schemas.CommandeUpdate(
             status_livraison="annulée",
         )
-        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+        db_commande = actions.update_commande(db_commande, new_commande, database)
+
+        if db_commande.payee:
+            message.notification_remboursement_commande_client_message(db_commande.id_commande, )
 
         return db_commande
     except HTTPException as e:
@@ -173,7 +176,7 @@ async def annulation_preparateur(id_commande: int, database: Session = Depends(g
         new_commande = schemas.CommandeUpdate(
             status_livraison="annulée",
         )
-        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+        db_commande = actions.update_commande(db_commande, new_commande, database)
 
         return db_commande
     except HTTPException as e:
