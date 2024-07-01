@@ -12,7 +12,7 @@ def verify_authorization(token: str = Header(None)):
     url = os.getenv("AUTHURL")
     key = os.getenv("SERVICEKEY")
     payload = {"token":token,"service_key":key}
-    response = requests.post(f"http://{url}/authentification/validation_token",
+    response = requests.post(f"https://{url}/authentification/validation_token",
                              json=payload, timeout=10)
     if response.status_code != 200:
         raise HTTPException(status_code=response.status_code,
