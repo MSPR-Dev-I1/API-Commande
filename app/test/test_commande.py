@@ -573,6 +573,13 @@ def test_post_annulation_preparateur(mocker):
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
 
+    mock_publisher = mocker.MagicMock()
+    mock_publisher_topic = mocker.MagicMock()
+    mocker.patch("app.message.create_publisher", return_value=mock_publisher)
+    mocker.patch("google.cloud.pubsub_v1.PublisherClient.topic_path",
+        return_value=mock_publisher_topic)
+    mocker.patch("google.cloud.pubsub_v1.PublisherClient.publish", return_value=None)
+
     setup_mock_auth(mocker)
 
     headers = {"token": "None"}

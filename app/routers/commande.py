@@ -159,7 +159,7 @@ async def annulation_client(id_commande: int, database: Session = Depends(get_db
 @router.post('/{id_commande}/annulation-preparateur',
     response_model=schemas.Commande, tags=['commande'])
 async def annulation_preparateur(id_commande: int, database: Session = Depends(get_db),
-                    _ = Depends(verify_authorization)):
+                    token = Depends(verify_authorization)):
     """
         Annulation la commande (par un préparateur)
     """
@@ -178,6 +178,9 @@ async def annulation_preparateur(id_commande: int, database: Session = Depends(g
             status_livraison="annulée",
         )
         db_commande = actions.update_commande(db_commande, new_commande, database)
+
+        message.notification_remboursement_commande_preparateur_message(
+            db_commande.id_commande, db_commande.payee, token)
 
         return db_commande
     except HTTPException as e:
