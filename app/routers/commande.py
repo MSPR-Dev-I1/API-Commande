@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.connexion import get_db
-from app import actions, schemas, models
+from app import actions, schemas, models, message
 from app.routers.auth import verify_authorization
 
 router = APIRouter()
@@ -126,7 +126,7 @@ async def get_commandes_client(id_client: int, database: Session = Depends(get_d
 
 @router.post('/{id_commande}/annulation-client', response_model=schemas.Commande, tags=['commande'])
 async def annulation_client(id_commande: int, database: Session = Depends(get_db),
-                    _ = Depends(verify_authorization)):
+                    token = Depends(verify_authorization)):
     """
         Annulation la commande (par un client)
     """
@@ -144,7 +144,11 @@ async def annulation_client(id_commande: int, database: Session = Depends(get_db
         new_commande = schemas.CommandeUpdate(
             status_livraison="annulée",
         )
-        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+        db_commande = actions.update_commande(db_commande, new_commande, database)
+
+        if db_commande.payee:
+            message.notification_remboursement_commande_client_message(
+                db_commande.id_commande, token)
 
         return db_commande
     except HTTPException as e:
@@ -155,7 +159,7 @@ async def annulation_client(id_commande: int, database: Session = Depends(get_db
 @router.post('/{id_commande}/annulation-preparateur',
     response_model=schemas.Commande, tags=['commande'])
 async def annulation_preparateur(id_commande: int, database: Session = Depends(get_db),
-                    _ = Depends(verify_authorization)):
+                    token = Depends(verify_authorization)):
     """
         Annulation la commande (par un préparateur)
     """
@@ -173,7 +177,10 @@ async def annulation_preparateur(id_commande: int, database: Session = Depends(g
         new_commande = schemas.CommandeUpdate(
             status_livraison="annulée",
         )
-        db_commande = actions.update_produit_commande(db_commande, new_commande, database)
+        db_commande = actions.update_commande(db_commande, new_commande, database)
+
+        message.notification_remboursement_commande_preparateur_message(
+            db_commande.id_commande, db_commande.payee, token)
 
         return db_commande
     except HTTPException as e:

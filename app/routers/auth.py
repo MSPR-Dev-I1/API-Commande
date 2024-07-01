@@ -20,3 +20,4 @@ def verify_authorization(token: str = Header(None)):
     validation = response.json().get("validation")
     if validation is None or validation is not True:
         raise HTTPException(status_code=403, detail="UnAuthorized")
+    return token
