@@ -126,7 +126,7 @@ async def get_commandes_client(id_client: int, database: Session = Depends(get_d
 
 @router.post('/{id_commande}/annulation-client', response_model=schemas.Commande, tags=['commande'])
 async def annulation_client(id_commande: int, database: Session = Depends(get_db),
-                    _ = Depends(verify_authorization)):
+                    token = Depends(verify_authorization)):
     """
         Annulation la commande (par un client)
     """
@@ -147,7 +147,8 @@ async def annulation_client(id_commande: int, database: Session = Depends(get_db
         db_commande = actions.update_commande(db_commande, new_commande, database)
 
         if db_commande.payee:
-            message.notification_remboursement_commande_client_message(db_commande.id_commande, )
+            message.notification_remboursement_commande_client_message(
+                db_commande.id_commande, token)
 
         return db_commande
     except HTTPException as e:

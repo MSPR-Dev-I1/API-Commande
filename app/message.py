@@ -12,10 +12,11 @@ def create_publisher(): # pragma: no cover
 
 def notification_remboursement_commande_client_message(id_commande: int, token: str):
     """
-        Public un message sur le topic annulation-commande-client-message-topic avec l'id commande et le token
+        Public un message sur 
+        le topic annulation-commande-client-message-topic avec l'id commande et le token
     """
     publisher = create_publisher()
-    
+
     notification_remboursement_commande_client_path = publisher.topic_path(
         google_project, 'annulation-commande-client-message-topic')
     data = {

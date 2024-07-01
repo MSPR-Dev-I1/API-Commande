@@ -18,7 +18,8 @@ def test_get_commandes(mocker):
         "payee": True,
         "status_livraison": "expédiée",
         "adresse_livraison": "9 rue de la Monnaie 59000 Lille",
-        "id_client": 1
+        "id_client": 1,
+        "produits_commande": []
     }]
     mocker.patch("sqlalchemy.orm.Session.query", return_value=commandes)
 
@@ -56,7 +57,8 @@ def test_get_commande(mocker):
         "payee": True,
         "status_livraison": "expédiée",
         "adresse_livraison": "9 rue de la Monnaie 59000 Lille",
-        "id_client": 1
+        "id_client": 1,
+        "produits_commande": []
     }
     mock_query = mocker.MagicMock()
     mock_query.where.return_value.first.return_value = db_commande
@@ -342,7 +344,8 @@ def test_get_commandes_client(mocker):
         "payee": True,
         "status_livraison": "expédiée",
         "adresse_livraison": "9 rue de la Monnaie 59000 Lille",
-        "id_client": 1 
+        "id_client": 1,
+        "produits_commande": []
     },
     {
         "id_commande": 2,
@@ -351,7 +354,8 @@ def test_get_commandes_client(mocker):
         "payee": False,
         "status_livraison": "en préparation",
         "adresse_livraison": "10 rue de la Monnaie 59000 Lille",
-        "id_client": 1
+        "id_client": 1,
+        "produits_commande": []
     }]
     mock_query = mocker.MagicMock()
     mock_query.where.return_value.all.return_value = commandes
@@ -392,7 +396,8 @@ def test_get_commandes_non_livrees(mocker):
         "payee": True,
         "status_livraison": "livrée",
         "adresse_livraison": "9 rue de la Monnaie 59000 Lille",
-        "id_client": 1 
+        "id_client": 1,
+        "produits_commande": []
     },
     {
         "id_commande": 2,
@@ -401,7 +406,8 @@ def test_get_commandes_non_livrees(mocker):
         "payee": False,
         "status_livraison": "livrée",
         "adresse_livraison": "10 rue de la Monnaie 59000 Lille",
-        "id_client": 1
+        "id_client": 1,
+        "produits_commande": []
     }]
     mock_query = mocker.MagicMock()
     mock_query.where.return_value.all.return_value = commandes
@@ -446,6 +452,13 @@ def test_post_annulation_client(mocker):
     )
     mocker.patch("app.actions.get_commande", return_value=db_commande)
     mocker.patch("sqlalchemy.orm.Session.commit", return_value=None)
+
+    mock_publisher = mocker.MagicMock()
+    mock_publisher_topic = mocker.MagicMock()
+    mocker.patch("app.message.create_publisher", return_value=mock_publisher)
+    mocker.patch("google.cloud.pubsub_v1.PublisherClient.topic_path",
+        return_value=mock_publisher_topic)
+    mocker.patch("google.cloud.pubsub_v1.PublisherClient.publish", return_value=None)
 
     setup_mock_auth(mocker)
 
